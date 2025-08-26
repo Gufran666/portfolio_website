@@ -7,11 +7,15 @@ class HeaderNavigationButton extends StatefulWidget {
     required this.text,
     required this.onPressed,
     this.isSelected = false,
+    this.textStyle,
+    this.hoverColor,
   });
 
   final String text;
   final VoidCallback onPressed;
   final bool isSelected;
+  final TextStyle? textStyle;
+  final Color? hoverColor;
 
   @override
   State<HeaderNavigationButton> createState() => _HeaderNavigationButtonState();
@@ -22,7 +26,19 @@ class _HeaderNavigationButtonState extends State<HeaderNavigationButton> {
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.isSelected || _isHovering ? Colors.cyan : Colors.white;
+    final isActive = widget.isSelected || _isHovering;
+    final baseColor = isActive
+        ? widget.hoverColor ?? const Color(0xFFFF00FF)
+        : widget.textStyle?.color ?? Colors.white;
+
+    final effectiveTextStyle = (widget.textStyle ?? GoogleFonts.orbitron(
+      textStyle: const TextStyle(
+        fontSize: 16,
+        color: Colors.white,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 1.2,
+      ),
+    )).copyWith(color: baseColor);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
@@ -31,27 +47,22 @@ class _HeaderNavigationButtonState extends State<HeaderNavigationButton> {
         onPressed: widget.onPressed,
         style: TextButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          foregroundColor: color,
+          foregroundColor: baseColor,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              widget.text,
-              style: GoogleFonts.firaCode(
-                textStyle: TextStyle(
-                  fontSize: 16,
-                  color: color,
-                ),
-              ),
+              widget.text.toUpperCase(),
+              style: effectiveTextStyle,
             ),
             const SizedBox(height: 4),
             AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOut,
               height: 2,
-              width: _isHovering || widget.isSelected ? 24.0 : 0.0,
-              color: color,
+              width: isActive ? 24.0 : 0.0,
+              color: baseColor,
             ),
           ],
         ),

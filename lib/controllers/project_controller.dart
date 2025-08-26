@@ -1,44 +1,45 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/failure.dart';
-import '../models/project_model.dart';
+import 'package:flutter/material.dart';
+import 'package:portfolio_website/models/failure.dart';
+import 'package:portfolio_website/models/project_model.dart';
 
-enum LoadingStatus { loading, success, error }
+enum LoadingStatus { initial, loading, success, error }
 
-class ProjectState {
-  final List<Project> projects;
-  final LoadingStatus status;
-  final Failure? failure;
+class ProjectController extends ChangeNotifier {
+  ProjectState _state = const ProjectState(status: LoadingStatus.initial, projects: [], failure: null);
 
-  ProjectState({
-    this.projects = const [],
-    this.status = LoadingStatus.loading,
-    this.failure,
-  });
+  ProjectState get state => _state;
 
-  ProjectState copyWith({
-    List<Project>? projects,
-    LoadingStatus? status,
-    Failure? failure,
-  }) {
-    return ProjectState(
-      projects: projects ?? this.projects,
-      status: status ?? this.status,
-      failure: failure ?? this.failure,
+  ProjectController() {
+    _loadProjects();
+  }
+
+  Future<void> _loadProjects() async {
+    _state = const ProjectState(status: LoadingStatus.loading, projects: [], failure: null);
+    notifyListeners();
+
+    final result = Project.getProjects();
+
+    result.fold(
+      (failure) {
+        _state = ProjectState(status: LoadingStatus.error, projects: [], failure: failure);
+        notifyListeners();
+      },
+      (projects) {
+        _state = ProjectState(status: LoadingStatus.success, projects: projects, failure: null);
+        notifyListeners();
+      },
     );
   }
 }
 
-class ProjectController extends StateNotifier<ProjectState> {
-  ProjectController() : super(ProjectState()) {
-    loadProjects();
-  }
+class ProjectState {
+  final LoadingStatus status;
+  final List<Project> projects;
+  final Failure? failure;
 
-  void loadProjects() {
-    state = state.copyWith(status: LoadingStatus.loading);
-    final result = Project.getProjects();
-    result.fold(
-      (failure) => state = state.copyWith(status: LoadingStatus.error, failure: failure),
-      (projects) => state = state.copyWith(status: LoadingStatus.success, projects: projects),
-    );
-  }
+  const ProjectState({
+    required this.status,
+    required this.projects,
+    this.failure,
+  });
 }

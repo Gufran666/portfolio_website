@@ -17,10 +17,18 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final defaultStyle = GoogleFonts.firaCode(
+    final defaultStyle = GoogleFonts.orbitron(
       textStyle: const TextStyle(
         color: Colors.white,
         fontSize: 16,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 1.2,
+        shadows: [
+          Shadow(
+            color: Color(0xFFFFFFFF), 
+            blurRadius: 8,
+          ),
+        ],
       ),
     );
 
@@ -29,7 +37,14 @@ class CustomButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: const BorderSide(
+            color: Color(0xFFFF00FF), 
+            width: 1.5,
+          ),
+        ),
       ),
       child: Text(
         text,

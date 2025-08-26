@@ -8,15 +8,22 @@ class BinaryBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.black, Colors.blueGrey],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
+      color: Colors.black,
       child: Stack(
-        children: children,
+        children: [
+          Positioned.fill(
+            child: Opacity(
+              opacity: 0.195,
+              child: Image.asset(
+                'assets/images/cyberpunk.jpeg', 
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+              ),
+            ),
+          ),
+
+          ...children,
+        ],
       ),
     );
   }

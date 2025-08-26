@@ -1,161 +1,203 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:portfolio_website/core/cyberpunk_text_styles.dart';
 import 'package:portfolio_website/views/widgets/custom_button.dart';
 import 'package:portfolio_website/views/widgets/binary_background.dart';
 
-class IntroSection extends StatelessWidget {
+class IntroSection extends StatefulWidget {
   const IntroSection({super.key});
 
   @override
+  State<IntroSection> createState() => _IntroSectionState();
+}
+
+class _IntroSectionState extends State<IntroSection>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<int> _typewriter;
+
+  final String quote = '"With great power comes great electricity bill"';
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 4),
+      vsync: this,
+    )..forward();
+
+    _typewriter = StepTween(
+      begin: 0,
+      end: quote.length,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Widget _buildGlitchHeading(String text) {
+    return ShaderMask(
+      shaderCallback: (bounds) => const LinearGradient(
+        colors: [Color(0xFFA020F0), Color(0xFFFFFFFF)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(bounds),
+      child: Text(
+        text,
+        style: CyberpunkTextStyles.heading.copyWith(color: Colors.white),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 600;
+    final isMobile = MediaQuery.of(context).size.width < 700;
 
-    final headingStyle = GoogleFonts.firaCode(
-      textStyle: const TextStyle(
-        color: Colors.white,
-        fontSize: 26,
-        fontWeight: FontWeight.bold,
-        height: 1.3,
-      ),
-    );
-
-    final subheadingStyle = GoogleFonts.firaCode(
-      textStyle: const TextStyle(
-        color: Colors.cyanAccent,
-        fontSize: 18,
-        height: 1.5,
-      ),
-    );
-
-    final quoteStyle = GoogleFonts.firaCode(
-      textStyle: const TextStyle(
-        color: Colors.white,
-        fontSize: 20,
-        fontStyle: FontStyle.italic,
-        height: 1.4,
-      ),
-    );
-
-    final authorStyle = GoogleFonts.firaCode(
-      textStyle: const TextStyle(
-        color: Colors.cyanAccent,
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
-      ),
-    );
-
-    return Stack(
+    return BinaryBackground(
       children: [
-        const BinaryBackground(),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 64),
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            border: Border.all(color: Colors.cyanAccent, width: 0.1),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            32,
+            20, // 🔹 No extra top padding
+            32,
+            32,
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Top Section
-              Flex(
-                direction: isMobile ? Axis.vertical : Axis.horizontal,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Text Block
                   Expanded(
                     flex: 2,
                     child: Padding(
-                      padding: EdgeInsets.only(
-                        left: isMobile ? 0 : 48,
-                        right: isMobile ? 0 : 24,
+                      padding: const EdgeInsets.only(
+                        left: 48,
+                        right: 16,
                       ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Elias is a web designer\nand front-end developer',
-                            style: headingStyle,
-                            textAlign: TextAlign.center,
+                          _buildGlitchHeading(
+                            'Gufran is a Mobile Application Developer\nand Software Engineer',
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
                           Text(
-                            'He crafts responsive websites\nwhere technologies meet creativity',
-                            style: subheadingStyle,
-                            textAlign: TextAlign.center,
+                            'He crafts high-end Apps\nwhere technologies meet creativity',
+                            style: CyberpunkTextStyles.subheading,
                           ),
-                          const SizedBox(height: 28),
+                          const SizedBox(height: 24),
                           CustomButton(
                             text: 'Contact me!!',
-                            textStyle: const TextStyle(
+                            textStyle: CyberpunkTextStyles.heading.copyWith(
+                              fontSize: 18,
                               color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
                             ),
                             onPressed: () {},
-                            color: Colors.cyanAccent.shade700,
+                            color: const Color(0xFFA020F0),
                           ),
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 24),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
                             decoration: BoxDecoration(
-                              border: Border.all(color: Colors.cyanAccent, width: 1),
-                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: Color(0xFFA020F0),
+                                width: 0.5,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.transparent,
                             ),
                             child: Text(
                               'Currently working on Portfolio',
-                              style: subheadingStyle,
-                              textAlign: TextAlign.center,
+                              style: CyberpunkTextStyles.subheading,
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-
-                  const SizedBox(width: 32, height: 32),
-
-                  // Image Block
                   Expanded(
-                    flex: 1,
+                    flex: 2,
                     child: Container(
-                      padding: const EdgeInsets.all(8),
+                      margin: const EdgeInsets.only(left: 24, right: 32),
+                      height: isMobile ? 300 : 430, // 🔹 Fixed height
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white, width: 2),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFA020F0).withOpacity(0.05),
+                            blurRadius: 30,
+                            spreadRadius: 6,
+                          ),
+                        ],
                       ),
-                      child: Image.asset(
-                        'assets/images/elias_photo.png', // Replace with your exported asset
-                        width: isMobile ? 220 : 300,
-                        fit: BoxFit.cover,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.asset(
+                              'assets/images/gufran_image.png',
+                              fit: BoxFit.cover, // 🔹 Fill the box neatly
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.black.withOpacity(0.4),
+                                    Colors.transparent,
+                                  ],
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 64),
+              const SizedBox(height: 32),
 
-              // Quote Section
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 28,
+                ),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white, width: 1),
+                  border: Border.all(color: Colors.white24, width: 1),
                   borderRadius: BorderRadius.circular(12),
+                  color: Colors.transparent,
                 ),
                 child: Column(
                   children: [
-                    Text(
-                      '"With great power comes great electricity bill"',
-                      style: quoteStyle,
-                      textAlign: TextAlign.center,
+                    AnimatedBuilder(
+                      animation: _typewriter,
+                      builder: (context, child) {
+                        final visibleText = quote.substring(
+                          0,
+                          _typewriter.value,
+                        );
+                        return Text(
+                          visibleText,
+                          style: CyberpunkTextStyles.quote,
+                          textAlign: TextAlign.center,
+                        );
+                      },
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
                     Text(
                       '- Dr. Who',
-                      style: authorStyle,
+                      style: CyberpunkTextStyles.author,
                       textAlign: TextAlign.center,
                     ),
                   ],

@@ -1,4 +1,3 @@
-// lib/views/home_view.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:portfolio_website/providers.dart';
@@ -13,7 +12,7 @@ import 'package:portfolio_website/views/widgets/binary_background.dart';
 class HomeView extends ConsumerWidget {
   const HomeView({super.key});
 
-  // Section keys
+
   static final introSectionKey = GlobalKey();
   static final projectsSectionKey = GlobalKey();
   static final skillsSectionKey = GlobalKey();
@@ -31,7 +30,6 @@ class HomeView extends ConsumerWidget {
     }
   }
 
-  // A wrapper to safely build sections and catch errors
   Widget _safeSection(Widget child, String name) {
     try {
       return child;
@@ -54,49 +52,48 @@ class HomeView extends ConsumerWidget {
     final homeState = ref.watch(homeProvider);
 
     return Scaffold(
-      backgroundColor: Colors.transparent, // let BinaryBackground show
+      backgroundColor: Colors.transparent,
       body: BinaryBackground(
-        child: CustomScrollView(
-          slivers: [
-            // Sticky header
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _SliverHeaderDelegate(
-                child: HeaderWidget(
-                  onNavigate: _scrollToSection,
-                  introKey: introSectionKey,
-                  projectsKey: projectsSectionKey,
-                  skillsKey: skillsSectionKey,
-                  aboutKey: aboutSectionKey,
-                  contactsKey: contactsSectionKey,
+        children: [
+          CustomScrollView(
+            slivers: [
+            
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _SliverHeaderDelegate(
+                  child: HeaderWidget(
+                    onNavigate: _scrollToSection,
+                    introKey: introSectionKey,
+                    projectsKey: projectsSectionKey,
+                    skillsKey: skillsSectionKey,
+                    aboutKey: aboutSectionKey,
+                    contactsKey: contactsSectionKey,
+                  ),
                 ),
               ),
-            ),
-            SliverList(
-              delegate: SliverChildListDelegate([
-                const SizedBox(height: 30),
-                _safeSection(IntroSection(key: introSectionKey), "IntroSection"),
-                const SizedBox(height: 100),
-                _safeSection(
-                    ProjectsSection(key: projectsSectionKey), "ProjectsSection"),
-                const SizedBox(height: 100),
-                _safeSection(
-                    SkillsSection(key: skillsSectionKey), "SkillsSection"),
-                const SizedBox(height: 100),
-                _safeSection(AboutSection(key: aboutSectionKey), "AboutSection"),
-                const SizedBox(height: 100),
-                _safeSection(
-                    ContactsSection(key: contactsSectionKey), "ContactsSection"),
-              ]),
-            ),
-          ],
-        ),
+              SliverList(
+                delegate: SliverChildListDelegate([
+                  const SizedBox(height: 30),
+                  _safeSection(IntroSection(key: introSectionKey), "IntroSection"),
+                  const SizedBox(height: 100),
+                  _safeSection(ProjectsSection(key: projectsSectionKey), "ProjectsSection"),
+                  const SizedBox(height: 100),
+                  _safeSection(SkillsSection(key: skillsSectionKey), "SkillsSection"),
+                  const SizedBox(height: 100),
+                  _safeSection(AboutSection(key: aboutSectionKey), "AboutSection"),
+                  const SizedBox(height: 100),
+                  _safeSection(ContactsSection(key: contactsSectionKey), "ContactsSection"),
+                ]),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
-// Delegate to make the header sticky
+
 class _SliverHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
   _SliverHeaderDelegate({required this.child});
@@ -107,8 +104,7 @@ class _SliverHeaderDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => 70;
 
   @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     return child;
   }
 
