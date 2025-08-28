@@ -16,6 +16,9 @@ dependencies:
   google_fonts: ^6.3.0
   carousel_slider: ^5.1.1
   url_launcher: ^6.3.2
+  animated_text_kit: ^4.2.3
+  flutter_staggered_animations: ^1.1.1
+  visibility_detector: ^0.4.0+2
 
 dev_dependencies:
   flutter_test:

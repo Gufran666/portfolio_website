@@ -1,87 +1,129 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:portfolio_website/core/app_assets.dart';
-import 'header_navigation_button.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:portfolio_website/core/cyberpunk_text_styles.dart';
+import 'package:portfolio_website/views/screens/home_view.dart';
 
 class HeaderWidget extends StatelessWidget {
-  final void Function(GlobalKey key) onNavigate;
-  final GlobalKey introKey;
-  final GlobalKey projectsKey;
-  final GlobalKey skillsKey;
-  final GlobalKey aboutKey;
-  final GlobalKey contactsKey;
+  final Function(GlobalKey) onNavigate;
+  final List<SectionInfo> sections;
 
   const HeaderWidget({
     super.key,
     required this.onNavigate,
-    required this.introKey,
-    required this.projectsKey,
-    required this.skillsKey,
-    required this.aboutKey,
-    required this.contactsKey,
+    required this.sections,
   });
+
+  static const _headerColor = Colors.black;
+  static const _dividerColor = Colors.white12;
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 700;
+
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.6),
-        border: Border.all(color: const Color(0xFF800080), width: 0.3), 
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFFF00FF).withOpacity(0.3),
-            blurRadius: 12,
-            spreadRadius: 1,
-          ),
-        ],
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 16 : 32,
+        vertical: 10,
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      decoration: BoxDecoration(
+        color: _headerColor.withOpacity(0.85),
+        border: const Border(bottom: BorderSide(color: _dividerColor)),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          
-          Container(
-            margin: const EdgeInsets.only(left: 20),
-            padding: const EdgeInsets.all(4),
-            child: Image.asset(
-              AppAssets.logo,
-              width: 100,
-              height: 48,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.broken_image, color: Color(0xFFFF1744)), 
+          _buildAnimatedNavItem(
+            index: 0,
+            child: Text(
+              'Portfolio',
+              style: CyberpunkTextStyles.heading.copyWith(color: Colors.white),
+              semanticsLabel: "Website Logo - Home",
             ),
           ),
-
-        
-          Row(
-            children: [
-              _navButton("Home", () => onNavigate(introKey)),
-              _navButton("Projects", () => onNavigate(projectsKey)),
-              _navButton("Skills", () => onNavigate(skillsKey)),
-              _navButton("About", () => onNavigate(aboutKey)),
-              _navButton("Contact", () => onNavigate(contactsKey)),
-            ],
-          ),
+          if (isMobile)
+            IconButton(
+              icon: const Icon(Icons.menu, color: Colors.white),
+              tooltip: "Open navigation menu",
+              onPressed: () {
+                Feedback.forTap(context);
+                showModalBottomSheet(
+                  context: context,
+                  backgroundColor: _headerColor.withOpacity(0.95),
+                  isScrollControlled: true,
+                  builder: (context) => FractionallySizedBox(
+                    heightFactor: 0.7,
+                    child: _buildMenu(context),
+                  ),
+                );
+              },
+            )
+          else
+            Flexible(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 12,
+                  children: sections.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final section = entry.value;
+                    return _buildAnimatedNavItem(
+                      index: index + 1,
+                      child: TextButton(
+                        onPressed: () => onNavigate(section.key),
+                        child: Text(
+                          section.title,
+                          style: CyberpunkTextStyles.subheading.copyWith(
+                            color: Colors.white70,
+                            fontSize: isMobile ? 14 : 16,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
         ],
       ),
     );
   }
 
-  Widget _navButton(String label, VoidCallback onPressed) {
-    return HeaderNavigationButton(
-      text: label,
-      onPressed: onPressed,
-      textStyle: GoogleFonts.orbitron(
-        textStyle: const TextStyle(
-          color: Color(0xFFFFFFFF), 
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 1.2,
-        ),
+  /// Reusable animation builder
+  Widget _buildAnimatedNavItem({required int index, required Widget child}) {
+    return AnimationConfiguration.staggeredList(
+      position: index,
+      duration: const Duration(milliseconds: 600),
+      child: SlideAnimation(
+        horizontalOffset: index.isEven ? -50.0 : 50.0,
+        child: FadeInAnimation(child: child),
       ),
-      hoverColor: const Color(0xFFFF1744), 
+    );
+  }
+
+  Widget _buildMenu(BuildContext context) {
+    return SafeArea(
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: sections.length,
+        itemBuilder: (context, index) {
+          final section = sections[index];
+          return _buildAnimatedNavItem(
+            index: index,
+            child: ListTile(
+              title: Text(
+                section.title,
+                style: CyberpunkTextStyles.subheading.copyWith(color: Colors.white),
+              ),
+              onTap: () {
+                Feedback.forTap(context);
+                onNavigate(section.key);
+                Navigator.pop(context);
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }
