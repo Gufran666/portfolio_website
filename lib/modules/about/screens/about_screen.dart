@@ -2,157 +2,210 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:portfolio_website/widgets/background_widget.dart';
-import '../controllers/about_controller.dart';
+import 'package:portfolio_website/widgets/hover_effect.dart';
+import 'package:portfolio_website/modules/about/controllers/about_controller.dart';
 
 class AboutView extends GetView<AboutController> {
   const AboutView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 800;
+        final double panelHeight = isMobile ? 500 : 600;
 
-    return BackgroundWidget(
-      child: Container(
-        constraints: BoxConstraints(minHeight: screenHeight),
-        alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 64),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildGlowingText('About Me', fontSize: 64),
-              const SizedBox(height: 48),
-              _buildGlowingPanel(
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        return BackgroundWidget(
+          child: SizedBox.expand(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 20 : 64,
+                  vertical: isMobile ? 32 : 64,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Center(child: _buildGlowingPortrait('assets/images/profile.jpg')),
-                    const SizedBox(height: 32),
-                    Text(
-                      'I’m Gufran, a passionate developer with a knack for creating innovative and user-friendly solutions. With 5+ years of experience in Flutter and UI/UX, I specialize in crafting high-quality applications that solve real-world problems. My goal is to deliver seamless experiences that delight clients and users alike.',
-                      style: GoogleFonts.montserrat(
-                        fontSize: 18,
-                        color: Colors.white70,
-                        height: 1.5,
-                      ),
-                      textAlign: TextAlign.justify,
-                    ),
+                    _buildText('About Me', fontSize: isMobile ? 48 : 64),
+                    SizedBox(height: isMobile ? 32 : 48),
+                    isMobile
+                        ? Column(
+                            children: [
+                              _buildPortrait(
+                                'assets/images/profile.jpg',
+                                isMobile,
+                                panelHeight,
+                              ),
+                              SizedBox(height: 24),
+                              _buildDescriptionAndSkills(isMobile, panelHeight),
+                            ],
+                          )
+                        : Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 4,
+                                child: _buildPortrait(
+                                  'assets/images/profile.jpg',
+                                  isMobile,
+                                  panelHeight,
+                                ),
+                              ),
+                              SizedBox(width: 48),
+                              Expanded(
+                                flex: 6,
+                                child: _buildDescriptionAndSkills(
+                                  isMobile,
+                                  panelHeight,
+                                ),
+                              ),
+                            ],
+                          ),
                   ],
                 ),
               ),
-              const SizedBox(height: 48),
-              _buildGlowingText('My Skills', fontSize: 36),
-              const SizedBox(height: 24),
-              _buildGlowingPanel(
-                Obx(() {
-                  final skills = controller.skills;
-                  if (skills.isEmpty) {
-                    return const Text(
-                      'Loading skills...',
-                      style: TextStyle(color: Colors.white54),
-                    );
-                  }
-                  return Wrap(
-                    spacing: 16,
-                    runSpacing: 16,
-                    children: skills.map((skill) => _buildTechChip(skill)).toList(),
-                  );
-                }),
-              ),
-            ],
+            ),
           ),
+        );
+      },
+    );
+  }
+
+  Widget _buildText(
+    String text, {
+    required double fontSize,
+    Color textColor = Colors.white,
+  }) {
+    return HoverEffect(
+      hoverColor: Colors.black,
+      builder: (isHovering) => Text(
+        text,
+        textAlign: TextAlign.center,
+        style: GoogleFonts.montserrat(
+          fontSize: fontSize,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 1.5,
+          color: isHovering
+              ? Colors.white.withOpacity(0.9)
+              : textColor.withOpacity(0.95),
         ),
       ),
     );
   }
 
-  Widget _buildGlowingText(String text, {required double fontSize}) {
-    return Text(
-      text,
-      style: GoogleFonts.orbitron(
-        fontSize: fontSize,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-        shadows: [
-          Shadow(color: const Color(0xFF4C00C2).withOpacity(0.6), blurRadius: 15),
-          Shadow(color: const Color(0xFF4C00C2).withOpacity(0.3), blurRadius: 30),
-        ],
+  Widget _buildDescriptionAndSkills(bool isMobile, double height) {
+    return _buildPanel(
+      SizedBox(
+        height: height,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'I’m Gufran, a passionate developer with a knack for creating innovative and user-friendly solutions. With 5+ years of experience in Flutter and UI/UX, I specialize in crafting high-quality applications that solve real-world problems. My goal is to deliver seamless experiences that delight clients and users alike.',
+              style: GoogleFonts.montserrat(
+                fontSize: isMobile ? 18 : 20,
+                color: Colors.white.withOpacity(0.75),
+                height: 1.7,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: isMobile ? 32 : 48),
+            _buildText('My Skills', fontSize: isMobile ? 24 : 32),
+            SizedBox(height: isMobile ? 16 : 24),
+            Obx(() {
+              final skills = controller.skills;
+              if (skills.isEmpty) {
+                return Text(
+                  'Loading skills...',
+                  style: GoogleFonts.montserrat(
+                    fontSize: isMobile ? 14 : 16,
+                    color: Colors.white.withOpacity(0.6),
+                  ),
+                );
+              }
+              return Wrap(
+                spacing: isMobile ? 8 : 12,
+                runSpacing: isMobile ? 8 : 12,
+                alignment: WrapAlignment.center,
+                children: skills
+                    .map((skill) => _buildTechChip(skill, isMobile))
+                    .toList(),
+              );
+            }),
+          ],
+        ),
       ),
+      isMobile: isMobile,
     );
   }
 
-  Widget _buildGlowingPanel(Widget child) {
+  Widget _buildPanel(Widget child, {required bool isMobile}) {
     return Container(
-      padding: const EdgeInsets.all(32),
+      width: double.infinity,
+      padding: EdgeInsets.all(isMobile ? 16 : 24),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white10),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF00C7FF).withOpacity(0.1),
-            blurRadius: 20,
-            spreadRadius: 2,
-          ),
-        ],
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.15)),
       ),
       child: child,
     );
   }
 
-  Widget _buildGlowingPortrait(String imagePath) {
-    return Container(
-      width: 250,
-      height: 250,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: const Color(0xFF00C7FF).withOpacity(0.5),
-          width: 3,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF00C7FF).withOpacity(0.5),
-            blurRadius: 30,
-            spreadRadius: 5,
+  Widget _buildPortrait(String imagePath, bool isMobile, double height) {
+    final size = isMobile ? height * 0.6 : height;
+    return HoverEffect(
+      hoverColor: Colors.black,
+      builder: (isHovering) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isHovering
+                ? Colors.white.withOpacity(0.3)
+                : Colors.white.withOpacity(0.2),
+            width: 2,
           ),
-        ],
-      ),
-      child: ClipOval(
+        ),
+        clipBehavior: Clip.hardEdge,
         child: Image.asset(
           imagePath,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) => Container(
-            color: Colors.grey,
-            child: const Icon(Icons.person, size: 100, color: Colors.white70),
+            color: const Color(0xFF2A2A2A),
+            child: Icon(
+              Icons.person,
+              size: isMobile ? 60 : 100,
+              color: Colors.white.withOpacity(0.7),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildTechChip(String tech) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.5),
-        border: Border.all(color: const Color(0xFF4C00C2).withOpacity(0.5)),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF4C00C2).withOpacity(0.3),
-            blurRadius: 5,
-            spreadRadius: 1,
+  Widget _buildTechChip(String tech, bool isMobile) {
+    return HoverEffect(
+      hoverColor: Colors.black,
+      builder: (isHovering) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          border: Border.all(
+            color: isHovering
+                ? Colors.white.withOpacity(0.3)
+                : Colors.white.withOpacity(0.2),
           ),
-        ],
-      ),
-      child: Text(
-        tech,
-        style: GoogleFonts.montserrat(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: const Color(0xFF00C7FF),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          tech,
+          style: GoogleFonts.montserrat(
+            fontSize: isMobile ? 13 : 14,
+            fontWeight: FontWeight.w500,
+            color: isHovering ? Colors.white : Colors.white.withOpacity(0.85),
+          ),
         ),
       ),
     );

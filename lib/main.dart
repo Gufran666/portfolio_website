@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:portfolio_website/routes/app.dart';
 import 'package:portfolio_website/routes/app_bindings.dart';
+import 'package:portfolio_website/utils/app_routes.dart';
 
 void main() {
+  // Global error tracking for mouse tracker and other runtime exceptions
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    debugPrintStack(label: 'Flutter Error', stackTrace: details.stack);
+  };
+
   AppBindings.init();
   runApp(const MyApp());
 }
@@ -13,7 +20,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'My Portfolio',
       theme: ThemeData(
         primaryColor: Colors.blueAccent,
@@ -37,7 +44,8 @@ class MyApp extends StatelessWidget {
           background: const Color(0xFF121212),
         ),
       ),
-      home: const PortfolioScreen(), // Your scroll-based layout
+      initialRoute: AppRoutes.home,
+      getPages: AppRoutes.routes,
       debugShowCheckedModeBanner: false,
     );
   }

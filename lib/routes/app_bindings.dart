@@ -1,4 +1,3 @@
-import 'package:get/get.dart';
 import 'package:portfolio_website/modules/home/bindings/home_binding.dart';
 import 'package:portfolio_website/modules/about/bindings/about_binding.dart';
 import 'package:portfolio_website/modules/projects/bindings/project_binding.dart';

@@ -4,236 +4,265 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:portfolio_website/modules/contact/controller/contact_controller.dart';
 import 'package:portfolio_website/widgets/background_widget.dart';
 import 'package:portfolio_website/widgets/hover_effect.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ContactScreen extends GetView<ContactController> {
   const ContactScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 600;
 
-    return BackgroundWidget(
-      child: Container(
-        constraints: BoxConstraints(minHeight: screenHeight),
-        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 64),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildGlowingText('Contact Me', fontSize: 64),
-            const SizedBox(height: 24),
-            Text(
-              'Get in touch to discuss your project or idea!',
-              style: GoogleFonts.montserrat(
-                fontSize: 18,
-                color: Colors.white70,
-              ),
-            ),
-            const SizedBox(height: 32),
-            _buildGlowingPanel(
-              Form(
-                key: controller.formKey,
+        return BackgroundWidget(
+          child: SizedBox.expand(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 16 : 32,
+                  vertical: isMobile ? 24 : 48,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildGlowingTextField(
-                      controller.nameController,
-                      'Name',
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Please enter your name' : null,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildGlowingTextField(
-                      controller.emailController,
-                      'Email',
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
-                        }
-                        if (!GetUtils.isEmail(value)) {
-                          return 'Please enter a valid email';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    _buildGlowingTextField(
-                      controller.messageController,
-                      'Message',
-                      maxLines: 5,
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Please enter your message' : null,
-                    ),
-                    const SizedBox(height: 24),
-                    Center(
-                      child: _buildGlowingButton(
-                        'Send Message',
-                        onPressed: () {
-                          if (controller.formKey.currentState!.validate()) {
-                            controller.submitForm();
-                            _showSuccessMessage(context);
-                          }
-                        },
+                    _buildText('Contact Me', fontSize: isMobile ? 36 : 48),
+                    SizedBox(height: isMobile ? 12 : 16),
+                    Text(
+                      'Get in touch to discuss your project or idea!',
+                      style: GoogleFonts.montserrat(
+                        fontSize: isMobile ? 14 : 16,
+                        color: Colors.white.withOpacity(0.7),
                       ),
+                    ),
+                    SizedBox(height: isMobile ? 16 : 24),
+                    _buildPanel(
+                      Form(
+                        key: controller.formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildTextField(
+                              controller.nameController,
+                              'Name',
+                              validator: (value) =>
+                                  value == null || value.isEmpty ? 'Please enter your name' : null,
+                              isMobile: isMobile,
+                            ),
+                            SizedBox(height: isMobile ? 8 : 12),
+                            _buildTextField(
+                              controller.emailController,
+                              'Email',
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your email';
+                                }
+                                if (!GetUtils.isEmail(value)) {
+                                  return 'Please enter a valid email';
+                                }
+                                return null;
+                              },
+                              isMobile: isMobile,
+                            ),
+                            SizedBox(height: isMobile ? 8 : 12),
+                            _buildTextField(
+                              controller.messageController,
+                              'Message',
+                              maxLines: isMobile ? 4 : 5,
+                              validator: (value) =>
+                                  value == null || value.isEmpty ? 'Please enter your message' : null,
+                              isMobile: isMobile,
+                            ),
+                            SizedBox(height: isMobile ? 12 : 16),
+                            Center(
+                              child: _buildButton(
+                                'Send Message',
+                                onPressed: () {
+                                  if (controller.formKey.currentState!.validate()) {
+                                    controller.submitForm();
+                                  }
+                                },
+                                isMobile: isMobile,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      isMobile: isMobile,
+                    ),
+                    SizedBox(height: isMobile ? 16 : 24),
+                    _buildText('Connect with Me', fontSize: isMobile ? 20 : 24),
+                    SizedBox(height: isMobile ? 8 : 12),
+                    Wrap(
+                      spacing: isMobile ? 6 : 8,
+                      runSpacing: isMobile ? 6 : 8,
+                      children: [
+                        _buildSocialButton(
+                          icon: Icons.code,
+                          label: 'GitHub',
+                          url: 'https://github.com/yourusername',
+                          isMobile: isMobile,
+                        ),
+                        _buildSocialButton(
+                          icon: Icons.link,
+                          label: 'LinkedIn',
+                          url: 'https://linkedin.com/in/yourusername',
+                          isMobile: isMobile,
+                        ),
+                        _buildSocialButton(
+                          icon: Icons.email,
+                          label: 'Email',
+                          url: 'mailto:your.email@example.com',
+                          isMobile: isMobile,
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
             ),
-          ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildText(String text, {required double fontSize}) {
+    return HoverEffect(
+      hoverColor: const Color(0xFFFFD700),
+      builder: (isHovering) => Text(
+        text,
+        style: GoogleFonts.montserrat(
+          fontSize: fontSize,
+          fontWeight: FontWeight.bold,
+          color: isHovering ? Colors.white : Colors.white.withOpacity(0.9),
         ),
       ),
     );
   }
 
-  Widget _buildGlowingText(String text, {
-    required double fontSize,
-    Color textColor = Colors.white,
-    Color glowColor = const Color(0xFF4C00C2),
-  }) {
-    return Text(
-      text,
-      style: GoogleFonts.orbitron(
-        fontSize: fontSize,
-        fontWeight: FontWeight.bold,
-        color: textColor,
-        shadows: [
-          Shadow(color: glowColor.withOpacity(0.6), blurRadius: 15),
-          Shadow(color: glowColor.withOpacity(0.3), blurRadius: 30),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGlowingButton(String text, {required VoidCallback onPressed}) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: HoverEffect(
-        builder: (isHovering) {
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-            transform: isHovering
-                ? (Matrix4.identity()..scale(1.05))
-                : Matrix4.identity(),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              gradient: LinearGradient(
-                colors: isHovering
-                    ? [const Color(0xFF00C7FF), const Color(0xFF4C00C2)]
-                    : [const Color(0xFF4C00C2), const Color(0xFF00C7FF)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF00C7FF).withOpacity(isHovering ? 0.8 : 0.4),
-                  blurRadius: isHovering ? 20 : 10,
-                  spreadRadius: isHovering ? 4 : 2,
-                ),
-              ],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onPressed,
-                borderRadius: BorderRadius.circular(12),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 20),
-                  child: Text(
-                    text,
-                    style: GoogleFonts.montserrat(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                      shadows: const [
-                        Shadow(color: Colors.white, blurRadius: 1),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildGlowingPanel(Widget child) {
+  Widget _buildPanel(Widget child, {required bool isMobile}) {
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(isMobile ? 12 : 16),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white10),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF00C7FF).withOpacity(0.1),
-            blurRadius: 20,
-            spreadRadius: 2,
-          ),
-        ],
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.2)),
       ),
       child: child,
     );
   }
 
-  Widget _buildGlowingTextField(
+  Widget _buildTextField(
     TextEditingController controller,
-    String labelText, {
+    String label, {
     String? Function(String?)? validator,
-    int? maxLines,
+    int maxLines = 1,
+    required bool isMobile,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF4C00C2).withOpacity(0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF00C7FF).withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
+    return TextFormField(
+      controller: controller,
+      validator: validator,
+      maxLines: maxLines,
+      style: GoogleFonts.montserrat(
+        fontSize: isMobile ? 13 : 15,
+        color: Colors.white,
       ),
-      child: TextFormField(
-        controller: controller,
-        style: GoogleFonts.montserrat(color: Colors.white),
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          labelText: labelText,
-          labelStyle: GoogleFonts.montserrat(color: Colors.white70),
-          filled: true,
-          fillColor: Colors.transparent,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF00C7FF), width: 2),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.redAccent, width: 2),
-          ),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.montserrat(
+          fontSize: isMobile ? 13 : 15,
+          color: Colors.white.withOpacity(0.7),
         ),
-        validator: validator,
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Color(0xFFFFD700)),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.redAccent),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.redAccent),
+          borderRadius: BorderRadius.circular(8),
+        ),
       ),
     );
   }
 
-  void _showSuccessMessage(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Message sent successfully!',
-          style: GoogleFonts.montserrat(color: Colors.white),
+  Widget _buildButton(String text, {required VoidCallback onPressed, required bool isMobile}) {
+    return HoverEffect(
+      hoverColor: const Color(0xFFFFD700),
+      builder: (isHovering) => Material(
+        color: isHovering ? const Color(0xFF1E1E1E) : const Color(0xFF121212),
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 16 : 24,
+              vertical: isMobile ? 10 : 12,
+            ),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: isHovering ? const Color(0xFFFFD700) : Colors.white.withOpacity(0.2),
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              text,
+              style: GoogleFonts.montserrat(
+                fontSize: isMobile ? 13 : 15,
+                fontWeight: FontWeight.w600,
+                color: isHovering ? const Color(0xFFFFD700) : Colors.white,
+              ),
+            ),
+          ),
         ),
-        backgroundColor: const Color(0xFF4C00C2).withOpacity(0.8),
-        duration: const Duration(seconds: 3),
-        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  Widget _buildSocialButton({
+    required IconData icon,
+    required String label,
+    required String url,
+    required bool isMobile,
+  }) {
+    return HoverEffect(
+      hoverColor: const Color(0xFFFFD700),
+      builder: (isHovering) => GestureDetector(
+        onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1E1E),
+            border: Border.all(
+              color: isHovering ? const Color(0xFFFFD700) : Colors.white.withOpacity(0.2),
+            ),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: isMobile ? 16 : 18, color: Colors.white),
+              SizedBox(width: 8),
+              Text(
+                label,
+                style: GoogleFonts.montserrat(
+                  fontSize: isMobile ? 13 : 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -1,14 +1,16 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:portfolio_website/models/project_model.dart';
 
-
 class ProjectsController extends GetxController {
   final projects = <ProjectModel>[].obs;
+  final PageController pageController = PageController(viewportFraction: 0.4);
 
   @override
   void onInit() {
     super.onInit();
-    // Sample projects; replace with your own
+
+    // Load sample projects (replace with dynamic fetch if needed)
     projects.addAll([
       ProjectModel(
         id: '1',
@@ -35,5 +37,15 @@ class ProjectsController extends GetxController {
         technologies: ['Flutter', 'GetX', 'Dart'],
       ),
     ]);
+  }
+
+  void navigateToProjectDetail(ProjectModel project) {
+    Get.toNamed('/project-detail', arguments: project);
+  }
+
+  @override
+  void onClose() {
+    pageController.dispose();
+    super.onClose();
   }
 }

@@ -1,126 +1,134 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:portfolio_website/widgets/hover_effect.dart';
+import 'package:portfolio_website/modules/home/controllers/home_controller.dart';
 import 'package:portfolio_website/widgets/background_widget.dart';
+import 'package:portfolio_website/widgets/hover_effect.dart';
 
-class HomeScreen extends StatelessWidget {
-  final VoidCallback onViewWork;
-
-  const HomeScreen({super.key, required this.onViewWork});
+class HomeScreen extends GetView<HomeController> {
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 600;
 
-    return BackgroundWidget(
-      child: Container(
-        constraints: BoxConstraints(minHeight: screenHeight),
-        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 64),
-        alignment: Alignment.center,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildGlowingText(
-              'Hi, I’m Gufran',
-              fontSize: 64,
-              fontBuilder: GoogleFonts.orbitron,
+        return BackgroundWidget(
+          child: SizedBox.expand(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 64),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Obx(() => _buildText(
+                          controller.heroTitle.value,
+                          fontSize: isMobile ? 48 : 72,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.5,
+                          textColor: Colors.white,
+                        )),
+                    SizedBox(height: isMobile ? 16 : 24),
+                    Obx(() => _buildText(
+                          controller.heroSubtitle.value,
+                          fontSize: isMobile ? 28 : 36,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.2,
+                          textColor: Colors.white.withOpacity(0.85),
+                        )),
+                    SizedBox(height: isMobile ? 20 : 32),
+                    Text(
+                      'Crafting seamless and delightful experiences through code and design.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.montserrat(
+                        fontSize: isMobile ? 18 : 22,
+                        color: Colors.white.withOpacity(0.65),
+                        height: 1.6,
+                      ),
+                    ),
+                    SizedBox(height: isMobile ? 32 : 48),
+                    Obx(() => _buildButton(
+                          controller.ctaButtonText.value,
+                          onPressed: controller.onViewWork,
+                          isMobile: isMobile,
+                        )),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
-            _buildGlowingText(
-              'A passionate developer crafting innovative solutions',
-              fontSize: 24,
-              fontBuilder: GoogleFonts.montserrat,
-              glowColor: const Color(0xFF00C7FF),
-            ),
-            const SizedBox(height: 48),
-            _buildGlowingButton(
-              'View My Work',
-              onPressed: onViewWork,
-            ),
-          ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildText(
+    String text, {
+    required double fontSize,
+    required FontWeight fontWeight,
+    required double letterSpacing,
+    required Color textColor,
+  }) {
+    return HoverEffect(
+      hoverColor: const Color(0xFFFFD700),
+      builder: (isHovering) => Text(
+        text,
+        textAlign: TextAlign.center,
+        style: GoogleFonts.montserrat(
+          fontSize: fontSize,
+          fontWeight: fontWeight,
+          letterSpacing: letterSpacing,
+          color: isHovering ? Colors.white : textColor,
+          height: 1.2,
         ),
       ),
     );
   }
 
-  Widget _buildGlowingText(
+  Widget _buildButton(
     String text, {
-    required double fontSize,
-    required TextStyle Function({
-      double? fontSize,
-      FontWeight? fontWeight,
-      Color? color,
-      List<Shadow>? shadows,
-    }) fontBuilder,
-    Color textColor = Colors.white,
-    Color glowColor = const Color(0xFF4C00C2),
+    required VoidCallback onPressed,
+    required bool isMobile,
   }) {
-    return Text(
-      text,
-      textAlign: TextAlign.center,
-      style: fontBuilder(
-        fontSize: fontSize,
-        fontWeight: FontWeight.bold,
-        color: textColor,
-        shadows: [
-          Shadow(color: glowColor.withOpacity(0.6), blurRadius: 15),
-          Shadow(color: glowColor.withOpacity(0.3), blurRadius: 30),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGlowingButton(String text, {required VoidCallback onPressed}) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: HoverEffect(
-        builder: (isHovering) {
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-            transform: isHovering
-                ? (Matrix4.identity()..scale(1.05))
-                : Matrix4.identity(),
+    return HoverEffect(
+      hoverColor: const Color(0xFFFFD700),
+      builder: (isHovering) => Material(
+        color: isHovering ? const Color(0xFF1E1E1E) : const Color(0xFF121212),
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 20 : 32,
+              vertical: isMobile ? 14 : 18,
+            ),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              gradient: LinearGradient(
-                colors: isHovering
-                    ? [const Color(0xFF00C7FF), const Color(0xFF4C00C2)]
-                    : [const Color(0xFF4C00C2), const Color(0xFF00C7FF)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+              border: Border.all(
+                color: isHovering ? const Color(0xFFFFD700) : Colors.white.withOpacity(0.2),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF00C7FF).withOpacity(isHovering ? 0.8 : 0.4),
-                  blurRadius: isHovering ? 20 : 10,
-                  spreadRadius: isHovering ? 4 : 2,
-                ),
-              ],
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: isHovering
+                  ? [
+                      BoxShadow(
+                        color: const Color(0xFFFFD700).withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : [],
             ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onPressed,
-                borderRadius: BorderRadius.circular(12),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 20),
-                  child: Text(
-                    text,
-                    style: GoogleFonts.montserrat(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                      shadows: const [
-                        Shadow(color: Colors.white, blurRadius: 1),
-                      ],
-                    ),
-                  ),
-                ),
+            child: Text(
+              text,
+              style: GoogleFonts.montserrat(
+                fontSize: isMobile ? 16 : 18,
+                fontWeight: FontWeight.w600,
+                color: isHovering ? const Color(0xFFFFD700) : Colors.white,
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }

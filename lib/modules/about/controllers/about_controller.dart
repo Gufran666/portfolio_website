@@ -1,14 +1,13 @@
 import 'package:get/get.dart';
 
 class AboutController extends GetxController {
-  final skills = <String>[
+  final RxList<String> skills = [
     'Flutter',
     'Dart',
-    'Firebase',
-    'Node.js',
-    'React',
-    'TypeScript',
     'UI/UX Design',
+    'Firebase',
     'REST APIs',
+    'GetX',
+    'Git',
   ].obs;
 }

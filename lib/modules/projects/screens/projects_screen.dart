@@ -7,156 +7,58 @@ import 'package:portfolio_website/widgets/background_widget.dart';
 import 'package:portfolio_website/widgets/hover_effect.dart';
 
 class ProjectsScreen extends GetView<ProjectsController> {
-  const ProjectsScreen({super.key});
+  final void Function(String projectId)? onProjectTap;
+
+  const ProjectsScreen({super.key, this.onProjectTap});
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 600;
 
-    return BackgroundWidget(
-      child: Container(
-        constraints: BoxConstraints(minHeight: screenHeight),
-        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 64),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildGlowingText('My Projects', fontSize: 64),
-            const SizedBox(height: 24),
-            Obx(
-              () => GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 450,
-                  crossAxisSpacing: 32,
-                  mainAxisSpacing: 32,
-                  childAspectRatio: 0.8,
-                ),
-                itemCount: controller.projects.length,
-                itemBuilder: (context, index) {
-                  final project = controller.projects[index];
-                  return _buildProjectCard(project);
-                },
+        return BackgroundWidget(
+          child: SizedBox.expand(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 16 : 32,
+                vertical: isMobile ? 24 : 48,
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGlowingText(
-    String text, {
-    required double fontSize,
-    Color textColor = Colors.white,
-    Color glowColor = const Color(0xFF4C00C2),
-  }) {
-    return Text(
-      text,
-      textAlign: TextAlign.start,
-      style: GoogleFonts.orbitron(
-        fontSize: fontSize,
-        fontWeight: FontWeight.bold,
-        color: textColor,
-        shadows: [
-          Shadow(color: glowColor.withOpacity(0.6), blurRadius: 15),
-          Shadow(color: glowColor.withOpacity(0.3), blurRadius: 30),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProjectCard(ProjectModel project) {
-    return HoverEffect(
-      builder: (isHovering) {
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-          transform: isHovering
-              ? (Matrix4.identity()..translate(0.0, -10.0))
-              : Matrix4.identity(),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isHovering
-                  ? const Color(0xFF00C7FF).withOpacity(0.8)
-                  : Colors.white10,
-              width: 2,
-            ),
-            gradient: LinearGradient(
-              colors: [
-                Colors.black.withOpacity(0.4),
-                Colors.black.withOpacity(0.2),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF00C7FF).withOpacity(isHovering ? 0.6 : 0.2),
-                blurRadius: isHovering ? 25 : 10,
-                spreadRadius: isHovering ? 3 : 1,
-              ),
-            ],
-          ),
-          child: GestureDetector(
-            onTap: () => Get.toNamed('/project-detail', arguments: project),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-                  child: Image.asset(
-                    project.imageUrl,
-                    height: 200,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      height: 200,
-                      color: Colors.grey,
-                      child: const Icon(Icons.broken_image, size: 50, color: Colors.white70),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        project.title,
-                        style: GoogleFonts.orbitron(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              color: const Color(0xFF00C7FF).withOpacity(0.5),
-                              blurRadius: 5,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildText('Projects', fontSize: isMobile ? 36 : 48),
+                  SizedBox(height: isMobile ? 16 : 24),
+                  Expanded(
+                    child: Obx(() {
+                      if (controller.projects.isEmpty) {
+                        return Center(
+                          child: Text(
+                            'No projects available',
+                            style: GoogleFonts.montserrat(
+                              fontSize: isMobile ? 14 : 16,
+                              color: Colors.white.withOpacity(0.6),
                             ),
-                          ],
+                          ),
+                        );
+                      }
+                      return GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: isMobile ? 1 : 2,
+                          crossAxisSpacing: isMobile ? 8 : 16,
+                          mainAxisSpacing: isMobile ? 8 : 16,
+                          childAspectRatio: isMobile ? 1.5 : 1.2,
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        project.description,
-                        style: GoogleFonts.montserrat(
-                          fontSize: 15,
-                          color: Colors.white70,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 20),
-                      Wrap(
-                        spacing: 8.0,
-                        runSpacing: 8.0,
-                        children: project.technologies.map(_buildTechChip).toList(),
-                      ),
-                    ],
+                        itemCount: controller.projects.length,
+                        itemBuilder: (context, index) {
+                          final project = controller.projects[index];
+                          return _buildProjectCard(project, isMobile);
+                        },
+                      );
+                    }),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
@@ -164,27 +66,84 @@ class ProjectsScreen extends GetView<ProjectsController> {
     );
   }
 
-  Widget _buildTechChip(String tech) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.5),
-        border: Border.all(color: const Color(0xFF4C00C2).withOpacity(0.5)),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF4C00C2).withOpacity(0.3),
-            blurRadius: 5,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-      child: Text(
-        tech,
+  Widget _buildText(
+    String text, {
+    required double fontSize,
+    Color textColor = Colors.white,
+  }) {
+    return HoverEffect(
+      hoverColor: const Color(0xFFFFD700),
+      builder: (isHovering) => Text(
+        text,
         style: GoogleFonts.montserrat(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: const Color(0xFF00C7FF),
+          fontSize: fontSize,
+          fontWeight: FontWeight.bold,
+          color: isHovering ? Colors.white : textColor.withOpacity(0.9),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProjectCard(ProjectModel project, bool isMobile) {
+    return HoverEffect(
+      hoverColor: const Color(0xFFFFD700),
+      builder: (isHovering) => GestureDetector(
+        onTap: () => onProjectTap?.call(project.id),
+        child: Container(
+          padding: EdgeInsets.all(isMobile ? 12 : 16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1E1E),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isHovering ? const Color(0xFFFFD700) : Colors.white.withOpacity(0.2),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (project.imageUrl != null)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(
+                    project.imageUrl!,
+                    height: isMobile ? 120 : 150,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      height: isMobile ? 120 : 150,
+                      color: const Color(0xFF2A2A2A),
+                      child: Icon(
+                        Icons.image_not_supported,
+                        size: isMobile ? 40 : 50,
+                        color: Colors.white.withOpacity(0.7),
+                      ),
+                    ),
+                  ),
+                ),
+              SizedBox(height: isMobile ? 8 : 12),
+              Text(
+                project.title,
+                style: GoogleFonts.montserrat(
+                  fontSize: isMobile ? 16 : 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              SizedBox(height: isMobile ? 4 : 8),
+              Text(
+                project.description,
+                style: GoogleFonts.montserrat(
+                  fontSize: isMobile ? 12 : 14,
+                  color: Colors.white.withOpacity(0.7),
+                  height: 1.5,
+                ),
+                maxLines: isMobile ? 2 : 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );
